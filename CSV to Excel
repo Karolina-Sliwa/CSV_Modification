@@ -1,0 +1,41 @@
+import time
+import pandas as pd
+from datetime import datetime
+
+
+i = 0
+for i in range(0,7):
+
+    file_name = input('Please provide file name:')
+
+    # read_csv function which is used to read the required CSV file
+    data = pd.read_csv(file_name, sep=';', usecols=['RecordType' , 'Vessel','IMO','Location','Terminal','Berth','Status','QuantityStatus','Unit','Arrived'],low_memory = True)
+
+    data = data[data.RecordType == 'A']
+    data = data[data.QuantityStatus == 'Estimated']
+    data = data[data.Status == 'Sailed']
+    data.insert(loc=7, column='Operation',value = ' ')
+    data.insert(loc=8, column='Product',value = ' ')
+    data.insert(loc=9, column='Grade',value = ' ')
+    data.insert(loc=10, column='BL Qty',value = ' ')
+    
+    data['Arrived'] = data['Arrived'].str.replace('.','/', regex = True)
+    data['Arrived'] = data['Arrived'].apply(lambda x: datetime.strptime(x, '%d/%m/%Y %H:%M'))
+    data.sort_values(by = 'Arrived',inplace = True, ascending = True)
+
+    data.pop('RecordType')
+    data.pop('QuantityStatus')
+
+
+    time.sleep(1)
+    
+
+    
+     #saving xlsx file
+    GFG = pd.ExcelWriter(input('Please provide Excel file name:'))
+    data.to_excel(GFG, index=False)
+
+    GFG.save()
+
+    input('Press Enter to continue.')
+    i += 1
